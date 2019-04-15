@@ -13,7 +13,7 @@ def split_train_test(df, train_size):
     return df_train, df_test
 
 
-def load_data(labels):
+def load_data(labels, train_size=0.5):
     """
 
     Parameters
@@ -46,7 +46,6 @@ def load_data(labels):
     else:
         df = df_meta
 
-    train_size = 0.5
     df_train, df_test = split_train_test(df, train_size)
 
     to_gray = False

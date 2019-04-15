@@ -1,6 +1,7 @@
 import numpy as np
 from hottbox.core import Tensor
 import copy
+from scipy.spatial.distance import pdist, cdist, squareform
 
 
 class LSSTM:
@@ -20,7 +21,7 @@ class LSSTM:
         self.orig_labels = None
 
 
-    def fit(self, X_train, labels, kernel=None):
+    def fit(self, X_train, labels, kernel=None, sig2=1):
         """
 
         Parameters
@@ -52,8 +53,10 @@ class LSSTM:
                 X_m = self._calc_Xm(X_train, w_n, n)
                 self.eta_history.append(eta)
 
-                w, b = self._compute_weights(X_m, labels, eta, self.C, kernel=kernel)
+                w, b = self._compute_weights(X_m, labels, eta, self.C, kernel=kernel, sig2=sig2)
+                w = w / np.linalg.norm(w)
                 w_n[n] = w
+
 
             self._update_model(w_n, b, i)
             if self._converged(): break
@@ -182,7 +185,7 @@ class LSSTM:
         return X_m
 
 
-    def _compute_weights(self, X_m, labels, eta, C, kernel):
+    def _compute_weights(self, X_m, labels, eta, C, kernel=None, sig2=1):
         """
 
         Parameters
@@ -199,17 +202,28 @@ class LSSTM:
         b: int, Bias
 
         """
+        M = X_m.shape[0]
         if kernel is None:
-            alphas = self._ls_optimizer(X_m, labels, eta, C, kernel)
-            w = np.sum(alphas[1:, :] * X_m, axis=0)
-            b = alphas[0][0]
+            alphas, b = self._ls_optimizer(X_m, labels, eta, C)
+            w = np.sum(alphas * X_m, axis=0)
+        elif kernel=='RBF':
+            y = np.zeros(M)
+            alphas, b = self._ls_optimizer(X_m, labels, eta, C, kernel=kernel, sig2=sig2)
+            for i in range(M):
+                x_star = X_m[[i]]
+                X_tmp = np.delete(X_m, i, axis=0)
+                l_tmp = np.delete(labels, i, axis=0)
+                alpha_tmp = np.delete(alphas, i, axis=0)[:,0]
+                rbf_vector = np.exp(-np.square(cdist(X_tmp, x_star)[:,0])/(2*sig2))
+                y[i] = np.sum(alpha_tmp*l_tmp*rbf_vector)
+            w = np.dot(np.linalg.pinv(X_m), y-b)
 
 
-        return w,b
+        return w, b
 
 
 
-    def _ls_optimizer(self, X_m, labels, eta, C, kernel):
+    def _ls_optimizer(self, X_m, labels, eta, C, kernel=None, sig2=1):
         """
 
         Parameters
@@ -223,7 +237,7 @@ class LSSTM:
         Returns
         -------
         alphas: the alphas computed from the Lagrangian. The first alpha is the b, the bias parameter
-
+        b = the bias parameter
         """
 
         M = X_m.shape[0]
@@ -231,7 +245,11 @@ class LSSTM:
         y_train = np.expand_dims(np.array(labels), axis=1)
 
         #For now, use no kernel
-        Omega = np.dot(X_m, X_m.transpose())
+        if kernel is None:
+            Omega = np.dot(X_m, X_m.transpose())
+        elif kernel=='RBF':
+            Omega = np.exp(-np.square(squareform(pdist(X_m))) / (2*sig2))
+
         left_column = np.expand_dims(np.append(np.array([0]), np.ones(M)), axis=1)
         right_block = np.append(np.expand_dims(np.ones(M), axis=0),  Omega + (1/gamma) * np.eye(M), axis=0)
         params = np.append( left_column, right_block, axis=1)
@@ -240,7 +258,10 @@ class LSSTM:
 
         alphas = np.dot(np.linalg.inv(params), RHS)
 
-        return alphas
+        b = alphas[0][0]
+        alphas = alphas[1:, :]
+
+        return alphas, b
 
 
 

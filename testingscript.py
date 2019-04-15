@@ -38,7 +38,7 @@ elif case == 3:
 else:
     df = df_meta
 
-train_size = 0.1
+train_size = 0.5
 df_train, df_test = split_train_test(df, train_size)
 
 to_gray = False
@@ -83,7 +83,7 @@ XXtest = [Tensor((X_test[i].data - meanTrain) / np.linalg.norm(X_test[i].data - 
 
 
 stm = LSSTM(C=10, max_iter=200)
-stm.fit(XXtrain, y_train)
+stm.fit(XXtrain, y_train, kernel='RBF', sig2=10)
 
 y_pred = stm.predict(XXtest)
 
