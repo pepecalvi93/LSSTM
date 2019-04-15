@@ -83,7 +83,7 @@ XXtest = [Tensor((X_test[i].data - meanTrain) / np.linalg.norm(X_test[i].data - 
 
 
 stm = LSSTM(C=10, max_iter=200)
-stm.fit(XXtrain, y_train, kernel='RBF', sig2=10)
+stm.fit(XXtrain, y_train, kernel='RBF', sig2=0.01)
 
 y_pred = stm.predict(XXtest)
 

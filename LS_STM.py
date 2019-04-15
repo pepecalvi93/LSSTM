@@ -81,14 +81,16 @@ class LSSTM:
         w_n = self.model['Weights']
         b = self.model['Bias']
         y_pred = []
+        dec_values = []
         for xtest in X_test:
             temp = xtest.copy()
             for n, w in enumerate(w_n):
                 temp.mode_n_product(np.expand_dims(w, axis=0), mode=n, inplace=True)
+            dec_values.append(temp.data.squeeze() + b)
             y_pred.append(np.sign(temp.data.squeeze() + b))
 
         y_pred = [self.orig_labels[0] if x == 1 else self.orig_labels[1] for x in y_pred]
-        return y_pred
+        return y_pred, dec_values
 
 
 
