@@ -20,7 +20,7 @@ class LSSTM:
         self.orig_labels = None
 
 
-    def fit(self, X_train, labels):
+    def fit(self, X_train, labels, kernel=None):
         """
 
         Parameters
@@ -52,7 +52,7 @@ class LSSTM:
                 X_m = self._calc_Xm(X_train, w_n, n)
                 self.eta_history.append(eta)
 
-                w, b = self._ls_optimizer(X_m, labels, eta, self.C)
+                w, b = self._compute_weights(X_m, labels, eta, self.C, kernel=kernel)
                 w_n[n] = w
 
             self._update_model(w_n, b, i)
@@ -182,20 +182,47 @@ class LSSTM:
         return X_m
 
 
-    def _ls_optimizer(self, X_m, labels, eta, C):
+    def _compute_weights(self, X_m, labels, eta, C, kernel):
         """
 
         Parameters
         ----------
         X_m: np.ndarray,  Matrix of contracted tensors along all weights except the current n
-        labels: int, the labels of hte tarining data
+        labels: int, the labels of hte training data
         eta: int, Parameter to be used in the algo
-        C: Cost
+        C: cost
+        kernel: which kernel to use (linear, rbf, etc)
 
         Returns
         -------
         w: list, Weights for mode n
         b: int, Bias
+
+        """
+        if kernel is None:
+            alphas = self._ls_optimizer(X_m, labels, eta, C, kernel)
+            w = np.sum(alphas[1:, :] * X_m, axis=0)
+            b = alphas[0][0]
+
+
+        return w,b
+
+
+
+    def _ls_optimizer(self, X_m, labels, eta, C, kernel):
+        """
+
+        Parameters
+        ----------
+        X_m: np.ndarray,  Matrix of contracted tensors along all weights except the current n
+        labels: int, the labels of hte training data
+        eta: int, Parameter to be used in the algo
+        C: Cost
+        kernel: which kernel to use (linear, rbf, etc)
+
+        Returns
+        -------
+        alphas: the alphas computed from the Lagrangian. The first alpha is the b, the bias parameter
 
         """
 
@@ -213,10 +240,8 @@ class LSSTM:
 
         alphas = np.dot(np.linalg.inv(params), RHS)
 
-        w = np.sum(alphas[1:,:] * X_m, axis=0)
-        b = alphas[0][0]
+        return alphas
 
-        return w, b
 
 
     def _update_model(self, w, b, nIter):
