@@ -1,0 +1,7 @@
+numpy
+scipy
+ipykernel
+pandas 
+matplotlib
+hottbox
+sklearn
