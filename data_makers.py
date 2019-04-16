@@ -77,12 +77,12 @@ def make_data_stm(d, start_index, L, tensor_size):
         data_np[:,:,i] = np.array(dict_stm[key].drop('Label', axis=1))
 
     train_data = []
-    train_labels = np.zeros(data_np.shape[0]-2)# the length is different from below because later we will
-    # get the last tensor for testing
-    for i in range(data_np.shape[0]-1):
+    n_tensors = data_np.shape[0]-tensor_size[0]+1
+    train_labels = np.zeros(n_tensors-1)
 
+    for i in range(n_tensors):
         # if training data
-        if i<data_np.shape[0]-1-1:
+        if i<n_tensors-1:
             train_data.append(Tensor(data_np[i:i+tensor_size[0],:,:]))
             train_labels[i] = dict_stm['Price']['Label'][i+tensor_size[0]-1]
 
