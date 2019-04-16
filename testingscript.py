@@ -8,7 +8,7 @@ from hottbox.core import Tensor
 from sklearn.svm import SVC
 
 import random
-from STM.LS_STM import LSSTM
+from LS_STM import LSSTM
 
 def split_train_test(df, train_size):
     test_size = 1 - train_size
