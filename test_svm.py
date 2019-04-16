@@ -46,7 +46,7 @@ plt.show()
 
 
 #---------------------------------------STM--------------------------------------------------
-dict_data = load_obj(dict_data)
+#dict_data = load_obj(dict_data)
 
 
 
