@@ -21,7 +21,7 @@ lookBack = 250
 y_pred_svm = np.zeros(M-1-lookBack)
 success = 0
 
-clf = SVC(kernel='linear', C=100, gamma='auto')
+clf = SVC(kernel='linear', C=10, gamma='auto')
 
 indices = []
 for i in range(M-1-lookBack):

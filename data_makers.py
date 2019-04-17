@@ -20,7 +20,7 @@ def make_data_svm(df , start_index, L):
     test_labels
     """
 
-    df_svm = df.copy(deep=True)
+    df_svm = copy.deepcopy(df)
 
     df_svm = df_svm[start_index:start_index + L]
 

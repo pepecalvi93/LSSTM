@@ -5,7 +5,7 @@ from scipy.spatial.distance import pdist, cdist, squareform
 
 
 class LSSTM:
-    def __init__(self, C, max_iter):
+    def __init__(self, C=10, kernel='linear', sig2=1, max_iter=100):
 
         self.order = None
         self.shape = None
@@ -19,9 +19,12 @@ class LSSTM:
         self.eta_history = []
         self.b_history = []
         self.orig_labels = None
+        self.kernel = kernel
+        self.sig2 = sig2
 
 
-    def fit(self, X_train, labels, kernel=None, sig2=1):
+
+    def fit(self, X_train, labels):
         """
 
         Parameters
@@ -53,7 +56,7 @@ class LSSTM:
                 X_m = self._calc_Xm(X_train, w_n, n)
                 self.eta_history.append(eta)
 
-                w, b = self._compute_weights(X_m, labels, eta, self.C, kernel=kernel, sig2=sig2)
+                w, b = self._compute_weights(X_m, labels, eta, self.C, kernel=self.kernel, sig2=self.sig2)
                 w = w / np.linalg.norm(w)
                 w_n[n] = w
 
@@ -190,7 +193,7 @@ class LSSTM:
         return X_m
 
 
-    def _compute_weights(self, X_m, labels, eta, C, kernel=None, sig2=1):
+    def _compute_weights(self, X_m, labels, eta, C, kernel, sig2):
         """
 
         Parameters
@@ -208,8 +211,8 @@ class LSSTM:
 
         """
         M = X_m.shape[0]
-        if kernel is None:
-            alphas, b = self._ls_optimizer(X_m, labels, eta, C)
+        if kernel=='linear':
+            alphas, b = self._ls_optimizer(X_m, labels, eta, C, kernel=kernel, sig2=sig2)
             w = np.sum(alphas * X_m, axis=0)
         elif kernel=='RBF':
             y = np.zeros(M)
@@ -228,7 +231,7 @@ class LSSTM:
 
 
 
-    def _ls_optimizer(self, X_m, labels, eta, C, kernel=None, sig2=1):
+    def _ls_optimizer(self, X_m, labels, eta, C, kernel, sig2):
         """
 
         Parameters
@@ -250,7 +253,7 @@ class LSSTM:
         y_train = np.expand_dims(np.array(labels), axis=1)
 
         #For now, use no kernel
-        if kernel is None:
+        if kernel=='linear':
             Omega = np.dot(X_m, X_m.transpose())
         elif kernel=='RBF':
             Omega = np.exp(-np.square(squareform(pdist(X_m))) / (2*sig2))
