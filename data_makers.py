@@ -70,14 +70,14 @@ def make_data_stm(d, start_index, L, tensor_size):
     dict_stm = copy.deepcopy(d)
     n_slices = len(dict_stm.keys())
     for key in dict_stm.keys():
-        dict_stm[key] = dict_stm[start_index:start_index + L]
+        dict_stm[key] = dict_stm[key][start_index:start_index + L]
 
     data_np = np.zeros([L] + tensor_size[1:])
     for i, key in enumerate(dict_stm.keys()):
         data_np[:,:,i] = np.array(dict_stm[key].drop('Label', axis=1))
 
     train_data = []
-    n_tensors = data_np.shape[0]-tensor_size[0]+1
+    n_tensors = L - tensor_size[0]+1
     train_labels = np.zeros(n_tensors-1)
 
     for i in range(n_tensors):

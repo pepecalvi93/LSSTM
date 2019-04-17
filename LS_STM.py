@@ -75,6 +75,9 @@ class LSSTM:
         y_pred: list of predicted laels
 
         """
+        #if singleton
+        if not isinstance(X_test, list):
+            X_test = [X_test]
 
         self._assert_data(X_test)
 
