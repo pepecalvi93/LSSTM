@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.svm import SVC
-from . data_makers import make_data_svm, make_data_stm
+from data_makers import make_data_svm, make_data_stm
 import numpy as np
-from . LS_STM import LSSTM
-from . aiding_functions import load_obj
+from LS_STM import LSSTM
+from aiding_functions import load_obj
 import copy
 
 class Strategy:
