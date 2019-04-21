@@ -8,10 +8,10 @@ raw_data = pd.read_csv('./finance_data/raw_data.csv')
 data_svm = pd.read_csv('./finance_data/raw_data_svm.csv')
 data_stm = load_obj('data_stm')
 
-C = 10
-sig2 = 10
+C = 50
+sig2 = 100
 strat = Strategy(raw_data = raw_data)
-results = strat.stm(data_stm=data_stm, tensor_size=[3,3,2], lookBack=250, C=C, kernel='RBF', sig2=sig2, verbose=True)
+results = strat.stm(data_stm=data_stm, tensor_size=[2,3,2], lookBack=250, lag=True, C=C, kernel='RBF', sig2=sig2, verbose=True)
 results_stm = results['Performance']
 results_stm.plot(figsize=(15,5))
 plt.title('Cost = {}, sigma = sig2={}'.format(C, sig2))

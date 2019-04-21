@@ -55,7 +55,7 @@ class Strategy:
         return results
 
 
-    def stm(self, data_stm, tensor_size, lookBack, C=10, kernel='linear', sig2=1, max_iter=100, verbose=False):
+    def stm(self, data_stm, tensor_size, lookBack, C=10, kernel='linear', sig2=1, max_iter=100, lag=False, verbose=False):
         raw_data = copy.deepcopy(self.raw_data)
         raw_data['Date'] = pd.to_datetime(raw_data['Date'], format='%Y-%m-%d')
         raw_data = raw_data.set_index('Date')
@@ -76,9 +76,7 @@ class Strategy:
         for i in range(n_tens - 1):
             if verbose:
                 print("\r{0}".format((float(i) / (n_tens - 1)) * 100))
-            train_data, train_labels, test_data, test_label, associated_index = make_data_stm(d=data_stm, start_index=i,
-                                                                                              L=lookBack,
-                                                                                              tensor_size=tensor_size)
+            train_data, train_labels, test_data, test_label, associated_index = make_data_stm(d=data_stm,start_index=i, L=lookBack, tensor_size=tensor_size, lag=lag)
             stm.fit(train_data, train_labels)
             y_tmp, _ = stm.predict(test_data)
             y_pred_stm[i] = y_tmp[0]

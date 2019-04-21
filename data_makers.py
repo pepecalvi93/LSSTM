@@ -44,10 +44,10 @@ def make_data_svm(df , start_index, L):
 
 
 
-def make_data_stm(d, start_index, L, tensor_size):
+def make_data_stm(d, start_index, L, tensor_size, lag):
     """
 
-    Notes: Assumes 3rd order tensors for now
+    Notes: Assumes 3rd order tensors for now, and that the order of the keys are known
 
     Parameters
     ----------
@@ -68,13 +68,29 @@ def make_data_stm(d, start_index, L, tensor_size):
     """
 
     dict_stm = copy.deepcopy(d)
-    n_slices = len(dict_stm.keys())
-    for key in dict_stm.keys():
-        dict_stm[key] = dict_stm[key][start_index:start_index + L]
+    if not lag:
+        keys = dict_stm.keys()
+        for key in keys:
+            dict_stm[key] = dict_stm[key][start_index:start_index + L]
 
-    data_np = np.zeros([L] + tensor_size[1:])
-    for i, key in enumerate(dict_stm.keys()):
-        data_np[:,:,i] = np.array(dict_stm[key].drop('Label', axis=1))
+        data_np = np.zeros([L] + tensor_size[1:])
+        for i, key in enumerate(keys):
+            data_np[:,:,i] = np.array(dict_stm[key].drop('Label', axis=1))
+
+    else:
+        #We are lagging the price here
+        tensor_size[-1] += 1
+        keys = ['Price', 'LaggedPrice', 'Volume']
+        dict_stm['LaggedPrice'] = dict_stm['Price'].shift(1).dropna()
+        dict_stm['Price'] = dict_stm['Price'][1:]
+        dict_stm['Volume'] = dict_stm['Volume'][1:]
+
+        for key in keys:
+            dict_stm[key] = dict_stm[key][start_index:start_index + L]
+
+        data_np = np.zeros([L] + tensor_size[1:])
+        for i, key in enumerate(keys):
+            data_np[:,:,i] = np.array(dict_stm[key].drop('Label', axis=1))
 
     train_data = []
     n_tensors = L - tensor_size[0]+1
