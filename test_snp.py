@@ -14,7 +14,7 @@ strat = Strategy(raw_data = raw_data)
 results = strat.stm(data_stm=data_stm, tensor_size=[2,3,2], lookBack=250, lag=True, C=C, kernel='linear', sig2=sig2, verbose=True)
 results_stm = results['Performance']
 results_stm.plot(figsize=(15,5))
-plt.title('Cost = {}, sigma = sig2={}'.format(C, sig2))
+plt.title('Cost = {}, sigma = {}'.format(C, sig2))
 plt.show()
 
 print(results['Accuracy'])

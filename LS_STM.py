@@ -1,8 +1,9 @@
 import numpy as np
 from hottbox.core import Tensor
 import copy
+import time
 from scipy.spatial.distance import pdist, cdist, squareform
-
+from aiding_functions import contractor
 
 class LSSTM:
     def __init__(self, C=10, kernel='linear', sig2=1, max_iter=100):
@@ -179,16 +180,25 @@ class LSSTM:
         """
         order = X_data[0].order
         w_n_new = [w for i, w in enumerate(w_n) if i != n]
-        M = len(X_data)
+      #  M = len(X_data)
         modes = [i for i in range(order) if i != n]
 
-        X_m = np.zeros((M, X_data[0].shape[n]))
-        for i, tensor in enumerate(X_data):
-            temp = tensor.copy()
-            for w, mode in zip(w_n_new, modes):
-                temp.mode_n_product(np.expand_dims(w, axis=0), mode, inplace=True)
-            x_m = np.expand_dims(temp.data.squeeze(), axis=0)
-            X_m[i, :] = x_m
+       # start_time = time.time()
+      #  X_m = np.zeros((M, X_data[0].shape[n]))
+       # for i, tensor in enumerate(X_data):
+        #    temp = tensor.copy()
+         #   for w, mode in zip(w_n_new, modes):
+          #      temp.mode_n_product(np.expand_dims(w, axis=0), mode, inplace=True)
+           # x_m = np.expand_dims(temp.data.squeeze(), axis=0)
+            #X_m[i, :] = x_m
+       # print("--- %s seconds ---" % (time.time() - start_time))
+
+       # X_data_new = copy.deepcopy(X_data)
+        #start_time = time.time()
+        result = list(map(lambda x: contractor(x, w_n_new, modes), X_data))
+        X_m = np.array(result).squeeze()
+        #print("--- %s seconds ---" % (time.time() - start_time))
+
 
         return X_m
 
