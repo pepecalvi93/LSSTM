@@ -93,6 +93,7 @@ class Strategy:
         #raw_data_diff.cumsum().plot(figsize=(10, 5))
 
         results = {'Accuracy': success / (n_tens - 1),
+                   'Ypred': y_pred_stm,
                    'Performance': raw_data_diff.cumsum()}
 
         return results
