@@ -1,9 +1,0 @@
-numpy
-scipy
-ipykernel
-pandas 
-matplotlib
-hottbox
-sklearn
-fix_yahoo_finance
-pandas_datareader
